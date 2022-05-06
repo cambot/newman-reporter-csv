@@ -12,8 +12,13 @@ const columns = [
   'responseSize',
   'executed',
   'failed',
-  'skipped'
+  'skipped',
+  'totalAssertions',
+  'passedCount',
+  'failedCount',
+  'skippedCount',
 ]
+
 
 const CSV = {
   stringify: (str) => {
@@ -50,7 +55,11 @@ module.exports = function newmanCSVReporter (newman, options) {
       iteration: cursor.iteration + 1,
       requestName: item.name,
       method: request.method,
-      url: request.url.toString()
+      url: request.url.toString(),
+      totalAssertions: 0,
+      passedCount: 0,
+      failedCount: 0,
+      skippedCount: 0,
     })
   })
 
@@ -70,6 +79,11 @@ module.exports = function newmanCSVReporter (newman, options) {
 
     log[key] = log[key] || []
     log[key].push(assertion)
+
+    log['totalAssertions']++
+    const assertionKey = (key == 'executed') ? 'passedCount' :
+                        (key == 'skipped') ? 'skippedCount' : 'failedCount'
+    log[assertionKey]++
   })
 
   newman.on('item', (err, e) => {
